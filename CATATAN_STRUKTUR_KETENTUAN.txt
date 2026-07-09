@@ -1,0 +1,10 @@
+ZIP ini mempertahankan seluruh file asli dari ZIP sumber.
+
+Folder tambahan src/components, src/pages, src/models, src/services, src/repositories, src/utils, dan src/errors dibuat agar struktur mirip ketentuan tutorial.
+
+Kode runtime Electron tetap di src/main, src/preload, dan src/renderer agar aplikasi tidak rusak.
+
+Setelah extract:
+1. npm install --legacy-peer-deps
+2. npm run dev
+3. npm run build

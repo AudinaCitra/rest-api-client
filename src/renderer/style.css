@@ -1,0 +1,537 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1e1e2e;
+  --panel: #27293d;
+  --line: #3a3d55;
+  --text: #e6e6ef;
+  --muted: #9aa0b4;
+  --accent: #6c8cff;
+  --accent2: #3a3d55;
+}
+
+body {
+  font-family: system-ui, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  padding: 14px;
+  overflow-y: auto;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 14px;
+  color: var(--accent);
+}
+
+.env-box label {
+  display: block;
+  font-size: .72rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.env-box select {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.side-section {
+  margin-top: 18px;
+}
+
+.side-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.coll-item > .coll-name {
+  font-weight: 600;
+  padding: 6px 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.coll-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.coll-item .req-item,
+.hist-item {
+  font-size: .8rem;
+  padding: 4px 4px 4px 14px;
+  cursor: pointer;
+  color: var(--muted);
+  border-radius: 4px;
+}
+
+.coll-item .req-item:hover,
+.hist-item:hover {
+  background: var(--accent2);
+  color: var(--text);
+}
+
+.req-method,
+.hist-method {
+  font-weight: 700;
+  font-size: .68rem;
+  margin-right: 6px;
+}
+
+/* Main */
+.main {
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.request-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.request-bar select {
+  width: 90px;
+}
+
+.request-bar input {
+  flex: 1;
+}
+
+input,
+select,
+textarea {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: .88rem;
+  font-family: inherit;
+}
+
+textarea {
+  width: 100%;
+  min-height: 130px;
+  resize: vertical;
+  font-family: "Consolas", monospace;
+}
+
+button {
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .85rem;
+  padding: 8px 14px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-secondary {
+  background: var(--accent2);
+  color: var(--text);
+}
+
+.btn-mini {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 3px 8px;
+  font-size: .72rem;
+}
+
+.btn-mini.danger {
+  color: #ff8b8b;
+  border-color: #6b3a3a;
+}
+
+.btn-mini:hover {
+  color: var(--text);
+}
+
+.icon-btn {
+  background: transparent;
+  color: var(--muted);
+  padding: 2px 6px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin: 6px 0;
+}
+
+.tab {
+  background: transparent;
+  color: var(--muted);
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  padding: 6px 10px;
+}
+
+.tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.tab-panel {
+  margin-bottom: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+.headers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 6px;
+}
+
+.headers-table th {
+  text-align: left;
+  font-size: .72rem;
+  color: var(--muted);
+  padding: 4px;
+  font-weight: 500;
+}
+
+.headers-table td {
+  padding: 3px;
+}
+
+.headers-table input[type="text"] {
+  width: 100%;
+}
+
+.response-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.badge-idle {
+  background: var(--accent2);
+  color: var(--muted);
+}
+
+.badge-2xx {
+  background: #1f7a3f;
+  color: #d7ffe4;
+}
+
+.badge-3xx {
+  background: #8a6d1f;
+  color: #fff3cf;
+}
+
+.badge-4xx,
+.badge-5xx {
+  background: #7a2020;
+  color: #ffd7d7;
+}
+
+#meta-time,
+#meta-size {
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+.response-pre {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 6px;
+  flex: 1;
+  min-height: 160px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Consolas", monospace;
+  font-size: .82rem;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  width: 520px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.modal-card h3 {
+  margin-bottom: 12px;
+}
+
+.modal-card .row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.modal-card input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Fix: modal harus benar-benar hilang saat diberi class hidden */
+.modal.hidden {
+  display: none;
+}
+
+/* ---------------- Body Raw / Form Data ---------------- */
+
+.body-mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.body-mode {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.body-mode.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.body-mode-panel {
+  margin-top: 6px;
+}
+
+.form-data-table {
+  margin-top: 4px;
+}
+
+.form-data-table th:first-child,
+.form-data-table td:first-child {
+  width: 42px;
+  text-align: center;
+}
+
+.form-data-table th:last-child,
+.form-data-table td:last-child {
+  width: 42px;
+  text-align: center;
+}
+
+.form-data-table input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: .75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ---------------- Balikin geser horizontal sidebar ---------------- */
+
+/* Sidebar boleh digeser kanan-kiri untuk lihat URL panjang */
+.sidebar {
+  overflow-x: auto !important;
+}
+
+/* History dibuat tidak kepotong supaya bisa digeser */
+.hist-item {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  min-width: max-content;
+}
+
+.hist-item span {
+  white-space: nowrap !important;
+}
+
+/* Request collection tetap rapi, X tetap kelihatan */
+.req-item {
+  width: 100%;
+  min-width: 0;
+}
+
+.req-item > div:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Modal tetap bisa ketutup */
+.modal.hidden {
+  display: none;
+}
+
+/* ---------------- Tambahan supaya X collection kelihatan ---------------- */
+
+/* Nama collection di atas, tombol Rename Export X di bawah */
+.coll-name {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* Nama collection boleh turun baris */
+.coll-name > span {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+/* Tombol collection dibuat satu baris */
+.coll-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+
+/* Tombol Rename dan Export dikecilkan sedikit */
+.coll-actions .btn-mini {
+  font-size: 10px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+
+/* Tombol X collection dipaksa ke kanan tapi tetap kelihatan */
+.coll-actions .icon-btn {
+  margin-left: auto;
+  width: 22px;
+  min-width: 22px;
+  padding: 2px 0;
+  flex-shrink: 0;
+}
+
+/* ---------------- Auth Helper ---------------- */
+
+.auth-box {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.auth-box label {
+  display: block;
+  font-size: .75rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.auth-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-row select {
+  width: 170px;
+}
+
+.auth-row button {
+  white-space: nowrap;
+}
+
+.auth-fields {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.auth-fields input {
+  flex: 1;
+}
+
+.auth-fields.hidden {
+  display: none;
+}
+
+/* ---------------- JSON Syntax Highlighting ---------------- */
+
+.json-key {
+  color: #9cdcfe;
+}
+
+.json-string {
+  color: #ce9178;
+}
+
+.json-number {
+  color: #b5cea8;
+}
+
+.json-boolean {
+  color: #569cd6;
+}
+
+.json-null {
+  color: #c586c0;
+}

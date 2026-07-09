@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>REST API Client</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="brand">REST Client</div>
+
+        <div class="env-box">
+          <label>Environment aktif</label>
+          <select id="env-select"></select>
+          <button id="btn-manage-env" class="btn-mini">Kelola variabel</button>
+        </div>
+
+        <div class="side-section">
+          <div class="side-head">
+            <span>Collections</span>
+            <button id="btn-import-collection" class="btn-mini">Import</button>
+            <button id="btn-add-collection" class="btn-mini">+ Baru</button>
+          </div>
+          <div id="collections"></div>
+        </div>
+
+        <div class="side-section">
+          <div class="side-head">
+            <span>History</span>
+            <button id="btn-clear-history" class="btn-mini">Bersihkan</button>
+          </div>
+          <div id="history"></div>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="main">
+        <!-- REQUEST BAR -->
+        <div class="request-bar">
+          <select id="method">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+            <option>DELETE</option>
+            <option>PATCH</option>
+          </select>
+
+          <input
+            id="url"
+            type="text"
+            placeholder="https://jsonplaceholder.typicode.com/posts/1"
+          />
+
+          <button id="btn-send" class="btn-primary">Send</button>
+          <button id="btn-save" class="btn-secondary">Simpan</button>
+        </div>
+
+        <!-- REQUEST TABS -->
+        <div class="tabs">
+          <button class="tab active" data-tab="headers">Headers</button>
+          <button class="tab" data-tab="body">Body</button>
+        </div>
+
+        <!-- HEADERS PANEL -->
+        <section id="tab-headers" class="tab-panel">
+          <!-- AUTH HELPER -->
+          <div class="auth-box">
+            <label>Auth Helper</label>
+
+            <div class="auth-row">
+              <select id="auth-type">
+                <option value="none">None</option>
+                <option value="bearer">Bearer Token</option>
+                <option value="basic">Basic Auth</option>
+                <option value="api-key">API Key</option>
+              </select>
+
+              <button id="btn-apply-auth" class="btn-mini" type="button">
+                Terapkan
+              </button>
+            </div>
+
+            <div id="auth-bearer-fields" class="auth-fields hidden">
+              <input
+                id="auth-token"
+                type="password"
+                placeholder="Bearer token..."
+              />
+            </div>
+
+            <div id="auth-basic-fields" class="auth-fields hidden">
+              <input
+                id="auth-username"
+                type="text"
+                placeholder="Username"
+              />
+
+              <input
+                id="auth-password"
+                type="password"
+                placeholder="Password"
+              />
+            </div>
+
+            <div id="auth-api-key-fields" class="auth-fields hidden">
+              <input
+                id="auth-api-key"
+                type="password"
+                placeholder="API key..."
+              />
+            </div>
+
+            <p class="hint">
+              Auth Helper akan otomatis menambahkan header Authorization atau X-API-Key.
+            </p>
+          </div>
+
+          <table class="headers-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Key</th>
+                <th>Value</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="headers-body"></tbody>
+          </table>
+
+          <button id="btn-add-header" class="btn-mini">+ Tambah header</button>
+        </section>
+
+        <!-- BODY PANEL -->
+        <section id="tab-body" class="tab-panel hidden">
+          <div class="body-mode-tabs">
+            <button
+              id="btn-body-raw"
+              class="btn-mini body-mode active"
+              data-body-mode="raw"
+              type="button"
+            >
+              Raw
+            </button>
+
+            <button
+              id="btn-body-form-data"
+              class="btn-mini body-mode"
+              data-body-mode="form-data"
+              type="button"
+            >
+              Form Data
+            </button>
+          </div>
+
+          <!-- RAW BODY -->
+          <div id="body-raw-panel" class="body-mode-panel">
+            <textarea id="body" placeholder='{ "title": "halo" }'></textarea>
+          </div>
+
+          <!-- FORM DATA BODY -->
+          <div id="body-form-data-panel" class="body-mode-panel hidden">
+            <table class="headers-table form-data-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="form-data-body"></tbody>
+            </table>
+
+            <button id="btn-add-form-data" class="btn-mini">
+              + Tambah form-data
+            </button>
+
+            <p class="hint">
+              Form Data digunakan untuk mengirim body dalam bentuk key-value.
+              Untuk mode ini, header Content-Type akan dibuat otomatis.
+            </p>
+          </div>
+        </section>
+
+        <!-- RESPONSE HEAD -->
+        <div class="response-head">
+          <span id="status-badge" class="badge badge-idle">
+            belum ada request
+          </span>
+          <span id="meta-time"></span>
+          <span id="meta-size"></span>
+        </div>
+
+        <!-- RESPONSE TABS -->
+        <div class="tabs">
+          <button class="tab rtab active" data-rtab="body">
+            Response Body
+          </button>
+          <button class="tab rtab" data-rtab="headers">
+            Response Headers
+          </button>
+        </div>
+
+        <pre id="response-body" class="response-pre"></pre>
+        <pre id="response-headers" class="response-pre hidden"></pre>
+      </main>
+    </div>
+
+    <!-- MODAL: environment variables -->
+    <div id="env-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3>Kelola Environment</h3>
+
+        <div class="row">
+          <select id="env-modal-select"></select>
+          <button id="btn-new-env" class="btn-mini">+ Env baru</button>
+          <button id="btn-del-env" class="btn-mini danger">Hapus env</button>
+        </div>
+
+        <input
+          id="env-name"
+          type="text"
+          placeholder="Nama environment (mis. Development)"
+        />
+
+        <table class="headers-table">
+          <thead>
+            <tr>
+              <th>Variabel</th>
+              <th>Nilai</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="env-vars-body"></tbody>
+        </table>
+
+        <button id="btn-add-var" class="btn-mini">+ Tambah variabel</button>
+
+        <div class="modal-actions">
+          <button id="btn-save-env" class="btn-primary">Simpan</button>
+          <button id="btn-close-env" class="btn-secondary">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./renderer.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,3 @@
+ZIP ini dibuat dari file ZIP asli yang dikirim user.
+Isi utama project dipertahankan, termasuk node_modules dan file konfigurasi asli.
+Perubahan hanya difokuskan pada perbaikan fitur/form-data, export-import, dan dokumentasi.
