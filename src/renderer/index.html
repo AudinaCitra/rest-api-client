@@ -16,14 +16,20 @@
         <div class="env-box">
           <label>Environment aktif</label>
           <select id="env-select"></select>
-          <button id="btn-manage-env" class="btn-mini">Kelola variabel</button>
+          <button id="btn-manage-env" class="btn-mini" type="button">
+            Kelola variabel
+          </button>
         </div>
 
         <div class="side-section">
           <div class="side-head">
             <span>Collections</span>
-            <button id="btn-import-collection" class="btn-mini">Import</button>
-            <button id="btn-add-collection" class="btn-mini">+ Baru</button>
+            <button id="btn-import-collection" class="btn-mini" type="button">
+              Import
+            </button>
+            <button id="btn-add-collection" class="btn-mini" type="button">
+              + Baru
+            </button>
           </div>
           <div id="collections"></div>
         </div>
@@ -31,7 +37,9 @@
         <div class="side-section">
           <div class="side-head">
             <span>History</span>
-            <button id="btn-clear-history" class="btn-mini">Bersihkan</button>
+            <button id="btn-clear-history" class="btn-mini" type="button">
+              Bersihkan
+            </button>
           </div>
           <div id="history"></div>
         </div>
@@ -55,14 +63,28 @@
             placeholder="https://jsonplaceholder.typicode.com/posts/1"
           />
 
-          <button id="btn-send" class="btn-primary">Send</button>
-          <button id="btn-save" class="btn-secondary">Simpan</button>
+          <button id="btn-send" class="btn-primary" type="button">
+            Send
+          </button>
+
+          <button id="btn-save" class="btn-secondary" type="button">
+            Simpan
+          </button>
+
+          <button id="btn-copy-curl" class="btn-secondary" type="button">
+            Copy cURL
+          </button>
         </div>
 
         <!-- REQUEST TABS -->
         <div class="tabs">
-          <button class="tab active" data-tab="headers">Headers</button>
-          <button class="tab" data-tab="body">Body</button>
+          <button class="tab active" data-tab="headers" type="button">
+            Headers
+          </button>
+
+          <button class="tab" data-tab="body" type="button">
+            Body
+          </button>
         </div>
 
         <!-- HEADERS PANEL -->
@@ -115,7 +137,8 @@
             </div>
 
             <p class="hint">
-              Auth Helper akan otomatis menambahkan header Authorization atau X-API-Key.
+              Auth Helper akan otomatis menambahkan header Authorization atau
+              X-API-Key.
             </p>
           </div>
 
@@ -128,10 +151,13 @@
                 <th></th>
               </tr>
             </thead>
+
             <tbody id="headers-body"></tbody>
           </table>
 
-          <button id="btn-add-header" class="btn-mini">+ Tambah header</button>
+          <button id="btn-add-header" class="btn-mini" type="button">
+            + Tambah header
+          </button>
         </section>
 
         <!-- BODY PANEL -->
@@ -172,10 +198,11 @@
                   <th></th>
                 </tr>
               </thead>
+
               <tbody id="form-data-body"></tbody>
             </table>
 
-            <button id="btn-add-form-data" class="btn-mini">
+            <button id="btn-add-form-data" class="btn-mini" type="button">
               + Tambah form-data
             </button>
 
@@ -191,22 +218,34 @@
           <span id="status-badge" class="badge badge-idle">
             belum ada request
           </span>
+
           <span id="meta-time"></span>
           <span id="meta-size"></span>
+
+          <button id="btn-response-diff" class="btn-mini" type="button">
+            Diff vs Previous
+          </button>
         </div>
 
         <!-- RESPONSE TABS -->
         <div class="tabs">
-          <button class="tab rtab active" data-rtab="body">
+          <button class="tab rtab active" data-rtab="body" type="button">
             Response Body
           </button>
-          <button class="tab rtab" data-rtab="headers">
+
+          <button class="tab rtab" data-rtab="headers" type="button">
             Response Headers
           </button>
         </div>
 
         <pre id="response-body" class="response-pre"></pre>
         <pre id="response-headers" class="response-pre hidden"></pre>
+
+        <!-- RESPONSE DIFF -->
+        <div id="response-diff-box" class="diff-box hidden">
+          <div class="diff-title">Response Diff</div>
+          <pre id="response-diff"></pre>
+        </div>
       </main>
     </div>
 
@@ -217,8 +256,14 @@
 
         <div class="row">
           <select id="env-modal-select"></select>
-          <button id="btn-new-env" class="btn-mini">+ Env baru</button>
-          <button id="btn-del-env" class="btn-mini danger">Hapus env</button>
+
+          <button id="btn-new-env" class="btn-mini" type="button">
+            + Env baru
+          </button>
+
+          <button id="btn-del-env" class="btn-mini danger" type="button">
+            Hapus env
+          </button>
         </div>
 
         <input
@@ -235,14 +280,22 @@
               <th></th>
             </tr>
           </thead>
+
           <tbody id="env-vars-body"></tbody>
         </table>
 
-        <button id="btn-add-var" class="btn-mini">+ Tambah variabel</button>
+        <button id="btn-add-var" class="btn-mini" type="button">
+          + Tambah variabel
+        </button>
 
         <div class="modal-actions">
-          <button id="btn-save-env" class="btn-primary">Simpan</button>
-          <button id="btn-close-env" class="btn-secondary">Tutup</button>
+          <button id="btn-save-env" class="btn-primary" type="button">
+            Simpan
+          </button>
+
+          <button id="btn-close-env" class="btn-secondary" type="button">
+            Tutup
+          </button>
         </div>
       </div>
     </div>

@@ -33,6 +33,9 @@ class RestClientApp {
   private editingRequestId: number | null = null;
   private editingCollectionId: number | null = null;
 
+  private previousResponseBody: string | null = null;
+  private latestResponseBody: string | null = null;
+
   // Buffer environment yang sedang diedit di modal.
   private envDraft: Environment | null = null;
 
@@ -46,6 +49,9 @@ class RestClientApp {
   this.setupCollections();
   this.setupHistory();
   this.setupEnvModal();
+  this.setupResponseDiff();
+  this.setupCopyCurl();
+
 
   this.addHeaderRow();
   this.addFormDataRow();
@@ -88,10 +94,92 @@ class RestClientApp {
     this.renderResponse(res);
     await this.refreshHistory();
   } catch (err) {
-    badge.textContent = 'gagal';
+    const message = err instanceof Error ? err.message : String(err);
+
+    badge.textContent = 'Error';
     badge.className = 'badge badge-5xx';
-    $('response-body').textContent = err instanceof Error ? err.message : String(err);
+
+    if (message.includes('[NETWORK_ERROR]')) {
+  $('response-body').textContent =
+    `${message}\n\n` +
+    `Server/koneksi belum merespons.\n` +
+    `Tunggu 5–10 detik, lalu klik Send lagi.\n` +
+    `Jika gagal, gunakan request backup yang sudah disimpan di collection.`;
+} else {
+  $('response-body').textContent = message;
+}
   }
+}
+
+private setupCopyCurl(): void {
+  $('btn-copy-curl').addEventListener('click', () => {
+    this.copyCurlCommand();
+  });
+}
+
+private async copyCurlCommand(): Promise<void> {
+  const req = this.readRequestFromForm();
+  const curl = this.buildCurlCommand(req);
+
+  try {
+    await navigator.clipboard.writeText(curl);
+    await this.showMessage('cURL berhasil disalin ke clipboard.');
+  } catch {
+    await this.showMessage(`Clipboard tidak tersedia. Salin manual:\n\n${curl}`);
+  }
+}
+
+private buildCurlCommand(req: ApiRequest): string {
+  const method = req.method.toUpperCase();
+  const bodyMode = req.bodyMode ?? 'raw';
+  const isFormData = bodyMode === 'form-data';
+
+  const parts: string[] = ['curl'];
+
+  parts.push('-X');
+  parts.push(this.quoteCurl(method));
+
+  parts.push(this.quoteCurl(req.url));
+
+  for (const header of req.headers) {
+    if (!header.enabled) continue;
+    if (!header.key.trim()) continue;
+
+    /**
+     * Untuk form-data, Content-Type sebaiknya tidak dipaksa manual
+     * karena boundary multipart dibuat otomatis oleh curl.
+     */
+    if (isFormData && header.key.trim().toLowerCase() === 'content-type') {
+      continue;
+    }
+
+    parts.push('-H');
+    parts.push(this.quoteCurl(`${header.key}: ${header.value}`));
+  }
+
+  if (method !== 'GET' && method !== 'HEAD') {
+    if (isFormData) {
+      for (const pair of req.formData ?? []) {
+        if (!pair.enabled) continue;
+        if (!pair.key.trim()) continue;
+
+        parts.push('-F');
+        parts.push(this.quoteCurl(`${pair.key}=${pair.value}`));
+      }
+    } else if (req.body.trim()) {
+      parts.push('--data-raw');
+      parts.push(this.quoteCurl(req.body));
+    }
+  }
+
+  return parts.join(' ');
+}
+
+private quoteCurl(value: string): string {
+  return `"${value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\r?\n/g, '\\n')}"`;
 }
 
 private renderResponse(res: ApiResponse): void {
@@ -101,6 +189,15 @@ private renderResponse(res: ApiResponse): void {
 
   $('meta-time').textContent = `${res.timeMs} ms`;
   $('meta-size').textContent = this.formatBytes(res.sizeBytes);
+
+  if (this.latestResponseBody !== null) {
+    this.previousResponseBody = this.latestResponseBody;
+  }
+
+  this.latestResponseBody = res.body;
+
+  $('response-diff-box').classList.add('hidden');
+  $('response-diff').textContent = '';
 
   this.renderResponseBody(res.body);
 
@@ -119,6 +216,78 @@ private renderResponseBody(text: string): void {
   } catch {
     target.textContent = formatted;
   }
+}
+
+private setupResponseDiff(): void {
+  $('btn-response-diff').addEventListener('click', () => {
+    this.renderResponseDiff();
+  });
+}
+
+private renderResponseDiff(): void {
+  const box = $('response-diff-box');
+  const target = $('response-diff');
+
+  box.classList.remove('hidden');
+
+  if (!this.previousResponseBody || !this.latestResponseBody) {
+    target.textContent =
+      'Belum ada response sebelumnya untuk dibandingkan. Kirim minimal 2 request dulu.';
+    return;
+  }
+
+  const previous = this.pretty(this.previousResponseBody).split('\n');
+  const current = this.pretty(this.latestResponseBody).split('\n');
+
+  const diff = this.createLineDiff(previous, current);
+
+  target.innerHTML = diff
+    .map((item) => {
+      const line = this.escapeHtml(item.text);
+
+      if (item.type === 'added') {
+        return `<span class="diff-added">+ ${line}</span>`;
+      }
+
+      if (item.type === 'removed') {
+        return `<span class="diff-removed">- ${line}</span>`;
+      }
+
+      return `<span class="diff-same">  ${line}</span>`;
+    })
+    .join('\n');
+}
+
+private createLineDiff(
+  oldLines: string[],
+  newLines: string[]
+): Array<{ type: 'same' | 'added' | 'removed'; text: string }> {
+  const result: Array<{ type: 'same' | 'added' | 'removed'; text: string }> = [];
+  const maxLength = Math.max(oldLines.length, newLines.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const oldLine = oldLines[i];
+    const newLine = newLines[i];
+
+    if (
+      oldLine !== undefined &&
+      newLine !== undefined &&
+      oldLine === newLine
+    ) {
+      result.push({ type: 'same', text: oldLine });
+      continue;
+    }
+
+    if (oldLine !== undefined) {
+      result.push({ type: 'removed', text: oldLine });
+    }
+
+    if (newLine !== undefined) {
+      result.push({ type: 'added', text: newLine });
+    }
+  }
+
+  return result;
 }
 
 private highlightJson(json: string): string {
@@ -581,37 +750,58 @@ private syncAuthHelperFromHeaders(): void {
   }
 
   private async saveRequest(): Promise<void> {
-    const collections = unwrap<Collection[]>(await window.api.collections.list());
+  const collections = unwrap<Collection[]>(await window.api.collections.list());
 
-    if (collections.length === 0) {
-      await this.showMessage('Buat collection dulu (tombol + Baru di sidebar).');
-      return;
-    }
-
-    const names = collections.map((c, i) => `${i + 1}. ${c.name}`).join('\n');
-    const currentIndex = this.editingCollectionId
-      ? collections.findIndex((c) => c.id === this.editingCollectionId) + 1
-      : 1;
-
-    const pick = await this.askText(
-      `Simpan ke collection nomor berapa?\n${names}`,
-      String(currentIndex > 0 ? currentIndex : 1)
-    );
-
-    if (!pick) return;
-
-    const idx = Number(pick) - 1;
-    if (Number.isNaN(idx) || !collections[idx]) return;
-
-    const req = this.readRequestFromForm();
-    const name = (await this.askText('Nama request:', req.name)) ?? req.name;
-
-    req.name = name;
-    req.collectionId = collections[idx].id ?? null;
-
-    unwrap(await window.api.requests.save(req));
-    await this.refreshCollections();
+  if (collections.length === 0) {
+    await this.showMessage('Buat collection dulu (tombol + Baru di sidebar).');
+    return;
   }
+
+  const names = collections.map((c, i) => `${i + 1}. ${c.name}`).join('\n');
+
+  const currentIndex = this.editingCollectionId
+    ? collections.findIndex((c) => c.id === this.editingCollectionId) + 1
+    : 1;
+
+  const pick = await this.askText(
+    `Simpan ke collection nomor berapa?\n${names}`,
+    String(currentIndex > 0 ? currentIndex : 1)
+  );
+
+  if (!pick) return;
+
+  const idx = Number(pick) - 1;
+
+  if (Number.isNaN(idx) || !collections[idx]) {
+    await this.showMessage('Nomor collection tidak valid.');
+    return;
+  }
+
+  const req = this.readRequestFromForm();
+  const name = (await this.askText('Nama request:', req.name)) ?? req.name;
+
+  /**
+   * Penting:
+   * id dibuat undefined supaya tombol Simpan selalu membuat request baru,
+   * bukan memperbarui request lama yang sedang dibuka.
+   */
+  req.id = undefined;
+  req.name = name;
+  req.collectionId = collections[idx].id ?? null;
+
+  unwrap(await window.api.requests.save(req));
+
+  /**
+   * Setelah simpan, keluar dari mode edit request lama.
+   * Tapi collection tetap diarahkan ke collection yang baru dipilih
+   * supaya save berikutnya default-nya masih ke collection yang sama.
+   */
+  this.editingRequestId = null;
+  this.editingCollectionId = collections[idx].id ?? null;
+
+  await this.refreshCollections();
+  await this.showMessage(`Request "${name}" berhasil disimpan sebagai request baru.`);
+}
 
   private async refreshCollections(): Promise<void> {
     const container = $('collections');
