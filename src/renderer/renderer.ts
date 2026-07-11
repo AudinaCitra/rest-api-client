@@ -51,7 +51,7 @@ class RestClientApp {
   this.setupEnvModal();
   this.setupResponseDiff();
   this.setupCopyCurl();
-
+  this.setupResponseVariable();
 
   this.addHeaderRow();
   this.addFormDataRow();
@@ -180,6 +180,123 @@ private quoteCurl(value: string): string {
     .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')
     .replace(/\r?\n/g, '\\n')}"`;
+}
+
+private setupResponseVariable(): void {
+  const button = document.getElementById('btn-save-response-var');
+
+  if (!button) return;
+
+  button.addEventListener('click', () => {
+    void this.saveVariableFromLatestResponse();
+  });
+}
+
+private async saveVariableFromLatestResponse(): Promise<void> {
+  const varName = $<HTMLInputElement>('pre-var-name').value.trim();
+  const jsonPath = $<HTMLInputElement>('pre-json-path').value.trim();
+
+  if (!this.latestResponseBody) {
+    await this.showMessage('Belum ada response. Kirim request dulu.');
+    return;
+  }
+
+  if (!varName) {
+    await this.showMessage('Nama variabel tidak boleh kosong.');
+    return;
+  }
+
+  if (!jsonPath) {
+    await this.showMessage('JSON path tidak boleh kosong.');
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(this.latestResponseBody);
+    const value = this.getValueByJsonPath(parsed, jsonPath);
+
+    if (value === undefined) {
+      await this.showMessage(`Path "${jsonPath}" tidak ditemukan di response terakhir.`);
+      return;
+    }
+
+    const environments = unwrap<Environment[]>(await window.api.environments.list());
+    const activeEnv = environments.find((env) => env.isActive);
+
+    if (!activeEnv) {
+      await this.showMessage('Belum ada environment aktif. Buat atau pilih environment dulu.');
+      return;
+    }
+
+    const valueText = this.variableValueToString(value);
+
+    const updatedEnv: Environment = {
+      ...activeEnv,
+      variables: {
+        ...activeEnv.variables,
+        [varName]: valueText,
+      },
+    };
+
+    const saved = unwrap<Environment>(await window.api.environments.save(updatedEnv));
+
+    if (saved.id) {
+      unwrap(await window.api.environments.setActive(saved.id));
+    }
+
+    await this.refreshEnvironments();
+
+    await this.showMessage(
+      `Variable {{${varName}}} berhasil disimpan dengan nilai: ${valueText}`
+    );
+  } catch {
+    await this.showMessage(
+      'Response terakhir bukan JSON valid, jadi tidak bisa diambil sebagai variable.'
+    );
+  }
+}
+
+private getValueByJsonPath(data: unknown, path: string): unknown {
+  const tokens = path
+    .replace(/\[(\d+)\]/g, '.$1')
+    .split('.')
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0);
+
+  let current: unknown = data;
+
+  for (const token of tokens) {
+    if (current === null || current === undefined) {
+      return undefined;
+    }
+
+    if (Array.isArray(current) && /^\d+$/.test(token)) {
+      current = current[Number(token)];
+      continue;
+    }
+
+    if (typeof current === 'object') {
+      const record = current as Record<string, unknown>;
+
+      if (Object.prototype.hasOwnProperty.call(record, token)) {
+        current = record[token];
+        continue;
+      }
+    }
+
+    return undefined;
+  }
+
+  return current;
+}
+
+private variableValueToString(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'boolean') return String(value);
+  if (value === null) return 'null';
+
+  return JSON.stringify(value);
 }
 
 private renderResponse(res: ApiResponse): void {

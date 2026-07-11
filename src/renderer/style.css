@@ -535,3 +535,76 @@ button {
 .json-null {
   color: #c586c0;
 }
+
+/* ---------------- Response Diff ---------------- */
+
+.diff-box {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.diff-title {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+#response-diff {
+  margin: 0;
+  padding: 10px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: "Consolas", monospace;
+  font-size: .82rem;
+}
+
+.diff-added {
+  display: block;
+  color: #b5cea8;
+}
+
+.diff-removed {
+  display: block;
+  color: #f48771;
+}
+
+.diff-same {
+  display: block;
+  color: var(--text);
+  opacity: .75;
+}
+
+#btn-copy-curl {
+  white-space: nowrap;
+}
+
+/* ---------------- Pre-request Variable ---------------- */
+
+.pre-request-box {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pre-request-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 130px;
+  gap: 8px;
+  padding: 10px;
+  align-items: center;
+}
+
+.pre-request-row input,
+.pre-request-row button {
+  height: 36px;
+}
+
+@media (max-width: 900px) {
+  .pre-request-row {
+    grid-template-columns: 1fr;
+  }
+}

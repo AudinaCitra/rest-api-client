@@ -1,8 +1,0 @@
-Build check dilakukan di sandbox dengan node_modules lokal yang sudah tersedia.
-Perintah: npm run build
-Hasil: sukses.
-
-Catatan: ZIP final tidak menyertakan node_modules. Setelah extract, jalankan:
-npm install --legacy-peer-deps
-npm run dev
-npm run build

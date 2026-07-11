@@ -4,7 +4,7 @@ Aplikasi desktop untuk membuat, mengirim, dan menyimpan HTTP request seperti Pos
 Project ini dibuat untuk studi kasus **Early Bird PBO**.
 
 **Nama:** Audina Citra Hapsari  
-**NIM:** 111202415724  
+**NIM:** A11.2024.15724  
 **Kelompok:** 44UG1  
 
 ---
@@ -14,23 +14,45 @@ Project ini dibuat untuk studi kasus **Early Bird PBO**.
 - TypeScript
 - Electron
 - electron-vite
+- Vite
 - SQLite
 - better-sqlite3
-- HTML, CSS, Vanilla TypeScript
+- HTML
+- CSS
+- Vanilla TypeScript
 
 ---
 
 ## Fitur
 
+### Core Features / MVP
+
 - HTTP method: GET, POST, PUT, DELETE, PATCH
-- Input URL, headers, raw body JSON/text, dan form-data key-value
-- Menampilkan response status, body, headers, waktu, dan ukuran response
+- Input URL endpoint
+- Tambah dan hapus headers dalam bentuk key-value
+- Input body request dalam bentuk raw JSON/text
+- Input body request dalam bentuk form-data key-value
+- Tombol Send untuk mengirim request
+- Menampilkan status code dengan indikator visual
+- Menampilkan response time
+- Menampilkan ukuran response body
+- Menampilkan response body
+- Menampilkan response headers
 - JSON response otomatis dibuat rapi
 - Collection: simpan, buka, rename, delete, import, export
-- Environment variable seperti `{{base_url}}`
+- Environment variable seperti `{{base_url}}` dan `{{api_key}}`
+- Substitusi variable otomatis pada URL, headers, body, dan form-data
 - History request otomatis
-- Persistensi data dengan SQLite
-- Error handling untuk URL invalid, timeout, network error, dan file import tidak valid
+- Persistensi data menggunakan SQLite
+- Error handling untuk URL invalid, timeout, network error, response non-JSON, nama collection duplikat, dan file import JSON tidak valid
+
+### Fitur Opsional / Stretch Goals
+
+- Auth helper untuk Bearer Token, Basic Auth, dan API Key
+- Syntax highlighting sederhana pada JSON response
+- Response diff untuk membandingkan response sekarang dengan response sebelumnya
+- Pre-request variable untuk menyimpan nilai dari response terakhir ke environment aktif
+- Copy as cURL untuk menyalin request menjadi command `curl`
 
 ---
 
@@ -72,7 +94,13 @@ npm rebuild better-sqlite3 --foreground-scripts
 npm run dev
 ```
 
-Catatan: folder `node_modules` tidak disertakan di ZIP karena ukurannya besar. Dependency dibuat ulang dengan `npm install`.
+Jika muncul error `NODE_MODULE_VERSION mismatch` pada `better-sqlite3`:
+
+```powershell
+npm run rebuild
+```
+
+Catatan: folder `node_modules` tidak disertakan di repository karena ukurannya besar. Dependency dibuat ulang dengan `npm install`.
 
 ---
 
@@ -84,21 +112,32 @@ Project memakai struktur Electron agar aplikasi berjalan:
 src/
   main/
     db/
+      CollectionRepository.ts
+      Database.ts
+      EnvironmentRepository.ts
+      HistoryRepository.ts
+      Repository.ts
+      RequestRepository.ts
     errors/
+      AppError.ts
     models/
+      types.ts
     services/
+      EnvironmentService.ts
+      HttpClient.ts
+      RequestService.ts
     index.ts
 
   preload/
     index.ts
 
   renderer/
+    global.d.ts
     index.html
     renderer.ts
     style.css
-```
 
-Project juga menyertakan struktur konseptual sesuai arahan tutorial:
+Project juga menyertakan struktur konseptual sesuai pembagian PBO:
 
 ```text
 src/
@@ -111,6 +150,10 @@ src/
   errors/
 ```
 
+Project ini menggunakan Electron, sehingga struktur runtime utama dibagi menjadi `main`, `preload`, dan `renderer`.
+
+Folder konseptual seperti `components`, `pages`, `models`, `services`, `repositories`, `utils`, dan `errors` digunakan sebagai pemetaan struktur PBO. Beberapa file berisi re-export dari implementasi utama agar struktur tetap rapi tanpa menduplikasi logic.
+
 Pembagian layer:
 
 - `components` untuk bagian tampilan
@@ -120,6 +163,9 @@ Pembagian layer:
 - `repositories` untuk akses database
 - `utils` untuk fungsi bantu
 - `errors` untuk error khusus
+- `main` untuk proses utama Electron, database, service, dan repository
+- `preload` untuk komunikasi aman antara renderer dan main process
+- `renderer` untuk tampilan UI aplikasi
 
 ---
 
@@ -152,8 +198,13 @@ Environment
 HistoryEntry
 ```
 
-`ApiRequest` menyimpan method, URL, headers, body raw, dan form-data.  
-`ApiResponse` menyimpan status, headers, body, waktu response, dan ukuran response.
+Penjelasan singkat:
+
+- `ApiRequest` menyimpan method, URL, headers, body raw, dan form-data
+- `ApiResponse` menyimpan status, headers, body, waktu response, dan ukuran response
+- `Collection` menyimpan kumpulan request
+- `Environment` menyimpan variable seperti `base_url` dan `api_key`
+- `HistoryEntry` menyimpan riwayat request yang pernah dikirim
 
 ---
 
@@ -164,12 +215,13 @@ HistoryEntry
 | Encapsulation | `Database.getInstance()` menyembunyikan koneksi SQLite |
 | Abstraction | `Repository<T>` sebagai abstract class |
 | Inheritance | Repository khusus mewarisi `Repository<T>` |
-| Polymorphism | Setiap repository punya `mapRow()` sendiri |
+| Polymorphism | Setiap repository punya implementasi `mapRow()` sendiri |
 | Generics | `Repository<T>` dipakai untuk banyak model |
 | Singleton | Database hanya punya satu instance |
-| Repository Pattern | Query database dipisahkan dari logic |
-| Service Layer | Logic utama ada di service |
+| Repository Pattern | Query database dipisahkan dari logic aplikasi |
+| Service Layer | Logic utama aplikasi ada di service |
 | Dependency Injection | Service menerima dependency lewat constructor |
+| Error Handling | Error khusus ditangani dengan custom error dan `IpcResult` |
 
 ---
 
@@ -196,25 +248,34 @@ Export collection menghasilkan file JSON berisi:
 }
 ```
 
-Import akan memvalidasi JSON, method, URL, header, dan form-data.
+Import akan memvalidasi JSON, method, URL, header, body mode, dan form-data.
 
 ---
 
 ## Contoh Pengujian
 
-GET:
+### GET
 
 ```text
 https://jsonplaceholder.typicode.com/posts/1
 ```
 
-POST JSON:
+### POST JSON
 
 ```text
 https://jsonplaceholder.typicode.com/posts
 ```
 
-Form-data:
+Body:
+
+```json
+{
+  "title": "Belajar PBO",
+  "userId": 1
+}
+```
+
+### Form-data
 
 ```text
 https://postman-echo.com/post
@@ -227,15 +288,126 @@ title   Belajar PBO Form Data
 userId  1
 ```
 
+### Environment Variable
+
+Variable:
+
+```text
+base_url = https://jsonplaceholder.typicode.com
+```
+
+URL request:
+
+```text
+{{base_url}}/posts/1
+```
+
+### Auth Helper
+
+Bearer Token:
+
+```text
+Authorization: Bearer abc123
+```
+
+Basic Auth:
+
+```text
+Authorization: Basic <encoded username:password>
+```
+
+API Key:
+
+```text
+X-API-Key: abc123
+```
+
+### Pre-request Variable
+
+Response terakhir:
+
+```json
+{
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit"
+}
+```
+
+Input:
+
+```text
+Nama variabel: last_post_id
+JSON path: id
+```
+
+Variable dapat digunakan pada request berikutnya:
+
+```text
+https://jsonplaceholder.typicode.com/posts/{{last_post_id}}
+```
+
+### Response Diff
+
+Kirim request pertama:
+
+```text
+https://jsonplaceholder.typicode.com/posts/1
+```
+
+Kirim request kedua:
+
+```text
+https://jsonplaceholder.typicode.com/posts/2
+```
+
+Klik tombol:
+
+```text
+Diff vs Previous
+```
+
+Aplikasi akan menampilkan perbedaan response sebelumnya dan response terbaru.
+
+### Copy as cURL
+
+Contoh hasil Copy cURL:
+
+```bash
+curl -X "GET" "https://postman-echo.com/get?demo=1"
+```
+
+Jika memakai auth helper, hasil cURL juga menyertakan header:
+
+```bash
+curl -X "GET" "https://postman-echo.com/get?demo=1" -H "Authorization: Bearer abc123"
+```
+
 ---
 
 ## Batasan
 
 - Form-data mendukung key-value.
 - File upload multipart belum didukung.
-- Auth helper belum didukung.
-- Syntax highlighting belum didukung.
-- Pre-request script belum didukung.
+- Pre-request yang didukung adalah penyimpanan variable dari response terakhir ke environment aktif, bukan script bebas seperti JavaScript custom.
+- Copy as cURL mendukung raw body dan form-data sederhana.
+- API Key helper menggunakan header `X-API-Key`.
+
+---
+
+## Error Handling
+
+Aplikasi menangani beberapa kondisi error, seperti:
+
+- URL kosong atau tidak valid
+- Server tidak merespons
+- Network error
+- Timeout
+- Response bukan JSON
+- File import collection tidak valid
+- Nama collection duplikat
+
+Jika server atau koneksi belum merespons, aplikasi menampilkan pesan error tanpa membuat aplikasi crash.
 
 ---
 
@@ -250,4 +422,7 @@ Aplikasi ini sudah memenuhi fitur utama REST API Client:
 - memakai environment variable
 - import/export JSON
 - menyimpan data di SQLite
+- menangani error tanpa membuat aplikasi crash
 - menerapkan OOP, service layer, repository pattern, dan error handling
+
+Aplikasi juga menambahkan fitur opsional seperti auth helper, syntax highlighting, response diff, pre-request variable, dan copy as cURL.
