@@ -9,6 +9,30 @@ Project ini dibuat untuk studi kasus **Early Bird PBO**.
 
 ---
 
+## Video Presentasi
+
+Link YouTube:
+
+```text
+https://youtu.be/sPjoMdhuSMw?si=E1wTFz2h7y-JKkvK
+```
+
+Video presentasi mencakup:
+
+- Demo aplikasi
+- Walkthrough fitur utama
+- Testing CRUD operations
+- Error handling
+- Demonstrasi fitur tambahan
+- Code review
+- Penjelasan arsitektur aplikasi
+- Penjelasan function penting
+- Database operations
+- Challenges and solutions
+- Learning outcomes
+
+---
+
 ## Stack
 
 - TypeScript
@@ -136,6 +160,7 @@ src/
     index.html
     renderer.ts
     style.css
+```
 
 Project juga menyertakan struktur konseptual sesuai pembagian PBO:
 
@@ -271,8 +296,52 @@ Body:
 ```json
 {
   "title": "Belajar PBO",
+  "body": "Membuat REST API Client menggunakan Electron dan TypeScript",
   "userId": 1
 }
+```
+
+Endpoint backup untuk POST:
+
+```text
+https://postman-echo.com/post
+```
+
+### PUT
+
+```text
+https://jsonplaceholder.typicode.com/posts/1
+```
+
+Body:
+
+```json
+{
+  "id": 1,
+  "title": "Judul Post Diubah",
+  "body": "Isi post diperbarui menggunakan method PUT",
+  "userId": 1
+}
+```
+
+### PATCH
+
+```text
+https://jsonplaceholder.typicode.com/posts/1
+```
+
+Body:
+
+```json
+{
+  "title": "Judul Diubah Dengan PATCH"
+}
+```
+
+### DELETE
+
+```text
+https://jsonplaceholder.typicode.com/posts/1
 ```
 
 ### Form-data
@@ -294,12 +363,25 @@ Variable:
 
 ```text
 base_url = https://jsonplaceholder.typicode.com
+api_key = abc123
 ```
 
 URL request:
 
 ```text
 {{base_url}}/posts/1
+```
+
+Post id juga dapat dibuat sebagai variable:
+
+```text
+post_id = 1
+```
+
+URL request:
+
+```text
+{{base_url}}/posts/{{post_id}}
 ```
 
 ### Auth Helper
@@ -347,6 +429,12 @@ Variable dapat digunakan pada request berikutnya:
 https://jsonplaceholder.typicode.com/posts/{{last_post_id}}
 ```
 
+Atau digabung dengan environment variable:
+
+```text
+{{base_url}}/posts/{{last_post_id}}
+```
+
 ### Response Diff
 
 Kirim request pertama:
@@ -361,13 +449,20 @@ Kirim request kedua:
 https://jsonplaceholder.typicode.com/posts/2
 ```
 
-Klik tombol:
+Buka tab:
 
 ```text
-Diff vs Previous
+Response Diff
 ```
 
-Aplikasi akan menampilkan perbedaan response sebelumnya dan response terbaru.
+Aplikasi akan menampilkan perbedaan response sebelumnya dan response terbaru. Baris dengan tanda minus menunjukkan data dari response sebelumnya, sedangkan baris dengan tanda plus menunjukkan data dari response terbaru.
+
+Contoh hasil:
+
+```text
+-   "id": 1,
++   "id": 2,
+```
 
 ### Copy as cURL
 
@@ -382,6 +477,33 @@ Jika memakai auth helper, hasil cURL juga menyertakan header:
 ```bash
 curl -X "GET" "https://postman-echo.com/get?demo=1" -H "Authorization: Bearer abc123"
 ```
+
+---
+
+## Checklist Pengujian
+
+Checklist fitur yang diuji:
+
+- GET request untuk mengambil data
+- POST request untuk membuat data
+- PUT request untuk update data penuh
+- PATCH request untuk update data sebagian
+- DELETE request untuk menghapus data
+- Raw JSON body
+- Form-data key-value
+- Headers key-value
+- Response body dan response headers
+- Status code, response time, dan ukuran response
+- Collection save dan load
+- Rename, delete, import, dan export collection
+- Environment variable
+- History request
+- Auth Helper
+- Syntax highlighting
+- Response Diff
+- Pre-request variable
+- Copy as cURL
+- Error handling untuk network error, timeout, URL invalid, dan file import invalid
 
 ---
 
