@@ -49,7 +49,6 @@ class RestClientApp {
   this.setupCollections();
   this.setupHistory();
   this.setupEnvModal();
-  this.setupResponseDiff();
   this.setupCopyCurl();
   this.setupResponseVariable();
 
@@ -335,11 +334,6 @@ private renderResponseBody(text: string): void {
   }
 }
 
-private setupResponseDiff(): void {
-  $('btn-response-diff').addEventListener('click', () => {
-    this.renderResponseDiff();
-  });
-}
 
 private renderResponseDiff(): void {
   const box = $('response-diff-box');
@@ -372,7 +366,7 @@ private renderResponseDiff(): void {
 
       return `<span class="diff-same">  ${line}</span>`;
     })
-    .join('\n');
+    .join('');
 }
 
 private createLineDiff(
@@ -470,29 +464,43 @@ private formatBytes(n: number): string {
 }
 
   // ---------------- Tabs ----------------
-  private setupTabs(): void {
-    document.querySelectorAll<HTMLButtonElement>('.tab[data-tab]').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab[data-tab]').forEach((t) => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        const which = tab.dataset.tab;
-        $('tab-headers').classList.toggle('hidden', which !== 'headers');
-        $('tab-body').classList.toggle('hidden', which !== 'body');
+private setupTabs(): void {
+  document.querySelectorAll<HTMLButtonElement>('.tab[data-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab[data-tab]').forEach((t) => {
+        t.classList.remove('active');
       });
+
+      tab.classList.add('active');
+
+      const which = tab.dataset.tab;
+
+      $('tab-headers').classList.toggle('hidden', which !== 'headers');
+      $('tab-body').classList.toggle('hidden', which !== 'body');
     });
+  });
 
-    document.querySelectorAll<HTMLButtonElement>('.rtab').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.rtab').forEach((t) => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        const which = tab.dataset.rtab;
-        $('response-body').classList.toggle('hidden', which !== 'body');
-        $('response-headers').classList.toggle('hidden', which !== 'headers');
+  document.querySelectorAll<HTMLButtonElement>('.rtab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.rtab').forEach((t) => {
+        t.classList.remove('active');
       });
+
+      tab.classList.add('active');
+
+      const which = tab.dataset.rtab;
+
+      $('response-body').classList.toggle('hidden', which !== 'body');
+      $('response-headers').classList.toggle('hidden', which !== 'headers');
+
+      if (which === 'diff') {
+        this.renderResponseDiff();
+      } else {
+        $('response-diff-box').classList.add('hidden');
+      }
     });
-  }
+  });
+}
 
   // ---------------- Headers editor ----------------
   private setupHeaders(): void {
@@ -532,20 +540,31 @@ private formatBytes(n: number): string {
   }
 
   private readHeaders(): HeaderPair[] {
-    const rows = Array.from($('headers-body').querySelectorAll('tr'));
+  const rows = Array.from($('headers-body').querySelectorAll('tr'));
+  const headers: HeaderPair[] = [];
 
-    return rows
-      .map((tr) => {
-        const inputs = tr.querySelectorAll('input');
+  for (const tr of rows) {
+    const [enabledInput, keyInput, valueInput] = Array.from(
+      tr.querySelectorAll('input')
+    ) as HTMLInputElement[];
 
-        const enabled = (inputs[0] as HTMLInputElement).checked;
-        const key = (inputs[1] as HTMLInputElement).value;
-        const value = (inputs[2] as HTMLInputElement).value;
+    if (!enabledInput || !keyInput || !valueInput) continue;
 
-        return { key, value, enabled };
-      })
-      .filter((h) => h.key.trim().length > 0);
+    const { checked: enabled } = enabledInput;
+    const { value: key } = keyInput;
+    const { value: headerValue } = valueInput;
+
+    if (key.trim().length > 0) {
+      headers.push({
+        key,
+        value: headerValue,
+        enabled,
+      });
+    }
   }
+
+  return headers;
+}
 
   // ---------------- Auth Helper ----------------
 private setupAuthHelper(): void {
@@ -792,20 +811,31 @@ private syncAuthHelperFromHeaders(): void {
   }
 
   private readFormData(): FormDataPair[] {
-    const rows = Array.from($('form-data-body').querySelectorAll('tr'));
+  const rows = Array.from($('form-data-body').querySelectorAll('tr'));
+  const formData: FormDataPair[] = [];
 
-    return rows
-      .map((tr) => {
-        const inputs = tr.querySelectorAll('input');
+  for (const tr of rows) {
+    const [enabledInput, keyInput, valueInput] = Array.from(
+      tr.querySelectorAll('input')
+    ) as HTMLInputElement[];
 
-        const enabled = (inputs[0] as HTMLInputElement).checked;
-        const key = (inputs[1] as HTMLInputElement).value;
-        const value = (inputs[2] as HTMLInputElement).value;
+    if (!enabledInput || !keyInput || !valueInput) continue;
 
-        return { key, value, enabled };
-      })
-      .filter((pair) => pair.key.trim().length > 0);
+    const { checked: enabled } = enabledInput;
+    const { value: key } = keyInput;
+    const { value: formValue } = valueInput;
+
+    if (key.trim().length > 0) {
+      formData.push({
+        key,
+        value: formValue,
+        enabled,
+      });
+    }
   }
+
+  return formData;
+}
 
   private loadRequest(req: ApiRequest): void {
   this.editingRequestId = req.id ?? null;

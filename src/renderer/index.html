@@ -221,10 +221,6 @@
 
           <span id="meta-time"></span>
           <span id="meta-size"></span>
-
-          <button id="btn-response-diff" class="btn-mini" type="button">
-            Diff vs Previous
-          </button>
         </div>
 
         <!-- RESPONSE TABS -->
@@ -236,46 +232,58 @@
           <button class="tab rtab" data-rtab="headers" type="button">
             Response Headers
           </button>
+
+          <button
+            id="btn-response-diff"
+            class="tab rtab"
+            data-rtab="diff"
+            type="button"
+          >
+            Response Diff
+          </button>
         </div>
 
+        <!-- RESPONSE BODY -->
         <pre id="response-body" class="response-pre"></pre>
+
+        <!-- RESPONSE HEADERS -->
         <pre id="response-headers" class="response-pre hidden"></pre>
 
         <!-- RESPONSE DIFF -->
-<div id="response-diff-box" class="diff-box hidden">
-  <div class="diff-title">Response Diff</div>
-  <pre id="response-diff"></pre>
-</div>
+        <div id="response-diff-box" class="diff-box hidden">
+          <div class="diff-title">Response Diff</div>
+          <pre id="response-diff"></pre>
+        </div>
 
-<!-- PRE-REQUEST / RESPONSE VARIABLE -->
-<div class="pre-request-box">
-  <div class="diff-title">Set Variable from Last Response</div>
+        <!-- PRE-REQUEST / RESPONSE VARIABLE -->
+        <div class="pre-request-box">
+          <div class="diff-title">Set Variable from Last Response</div>
 
-  <div class="pre-request-row">
-    <input
-      id="pre-var-name"
-      type="text"
-      placeholder="Nama variabel, contoh: last_post_id"
-    />
+          <div class="pre-request-row">
+            <input
+              id="pre-var-name"
+              type="text"
+              placeholder="Nama variabel, contoh: last_post_id"
+            />
 
-    <input
-      id="pre-json-path"
-      type="text"
-      placeholder="JSON path, contoh: id atau data.token"
-    />
+            <input
+              id="pre-json-path"
+              type="text"
+              placeholder="JSON path, contoh: id atau data.token"
+            />
 
-    <button id="btn-save-response-var" class="btn-mini" type="button">
-      Simpan Variable
-    </button>
-  </div>
+            <button id="btn-save-response-var" class="btn-mini" type="button">
+              Simpan Variable
+            </button>
+          </div>
 
-  <p class="hint">
-    Nilai dari response terakhir akan disimpan ke environment aktif dan bisa
-    dipakai sebagai {{nama_variabel}} pada request berikutnya.
-  </p>
-</div>
-</main>
-</div>
+          <p class="hint">
+            Nilai dari response terakhir akan disimpan ke environment aktif dan
+            bisa dipakai sebagai {{nama_variabel}} pada request berikutnya.
+          </p>
+        </div>
+      </main>
+    </div>
 
     <!-- MODAL: environment variables -->
     <div id="env-modal" class="modal hidden">

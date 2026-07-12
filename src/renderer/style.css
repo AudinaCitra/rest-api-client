@@ -539,10 +539,11 @@ button {
 /* ---------------- Response Diff ---------------- */
 
 .diff-box {
-  margin-top: 12px;
+  margin-top: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .diff-title {
@@ -550,17 +551,23 @@ button {
   border-bottom: 1px solid var(--line);
   color: var(--muted);
   font-size: .8rem;
+  font-weight: 600;
 }
 
 #response-diff {
+  display: block;
+  box-sizing: border-box;
   margin: 0;
   padding: 10px;
-  overflow: auto;
+  height: 260px;
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: auto;
   white-space: pre-wrap;
   font-family: "Consolas", monospace;
   font-size: .82rem;
+  line-height: 1.45;
 }
-
 .diff-added {
   display: block;
   color: #b5cea8;
@@ -588,11 +595,12 @@ button {
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .pre-request-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 130px;
+  grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) 140px;
   gap: 8px;
   padding: 10px;
   align-items: center;
@@ -601,6 +609,14 @@ button {
 .pre-request-row input,
 .pre-request-row button {
   height: 36px;
+}
+
+.pre-request-box .hint {
+  margin: 0;
+  padding: 0 10px 10px;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.4;
 }
 
 @media (max-width: 900px) {
